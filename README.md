@@ -1,8 +1,6 @@
 # dot-vs-full-refraction-recommender-system
 Machine learning based recommendation system for classifying participants into DOT Glasses or Full Refraction using screening, prescription, demographic, and process-related data from low-resource eye-care settings in Kenya.
 
-# DOT vs Full Refraction Recommender System
-
 This repository contains the implementation notebook for a machine learning based recommendation system that classifies participants into either the DOT Glasses pathway or the Full Refraction pathway.
 
 ## Project Title
