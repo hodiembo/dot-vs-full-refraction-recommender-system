@@ -1,0 +1,117 @@
+Step 1. The Raw Dataset: Challenges Noticed
+The initial dataset (all_inclusion_BI.xlsx) had:
+•	Multiple measurement systems (Snellen, N-notation, S-cases).
+•	Inconsistent formatting (e.g., 6/12+1, 6/7.5-1, 1MIN, Plano).
+•	Duplicated or unclear columns (short vs long prescriptions, multiple time columns).
+•	Blank or invalid entries.
+•	Multi-layered features/ column headers 
+This made direct analysis impossible especially in building a dashboard. The first task was to standardize everything to comparable values, especially vision acuity (VA).
+
+Step 2. VA to logMAR Conversion Formula
+Since the core of the analysis was vision outcomes, we focused on converting all VA measures to logMAR equivalents.
+Basically, the formula followed the algorithm below:
+
+IF the cell is blank OR equals "-":
+    Return blank
+
+ELSE
+    Try:
+        IF the cell contains "/":
+            Extract numerator = text before "/"
+            Extract denominator = text after "/"
+            logMAR = log10(denominator / numerator)
+            Round logMAR to 2 decimal places
+            Return logMAR
+        ELSE
+            Return blank
+    If any error occurs:
+        Return blank
+ 
+And the actual formula is: 
+
+logMAR = log10(denominator / numerator)
+ 
+Explanation of the formula: 
+•	Checks if blank or invalid (-) then leaves empty.
+•	If Snellen format (6/x), extracts the denominator and applies:
+logMAR = log10(denominator/numerator).
+•	Handles special cases (+1, –1, decimals) by adjusting with ±0.02 per line.
+•	N-notation and S-cases were mapped using equivalent lookup logic.
+This formula became the foundation of cleaning VA columns. Once standardized, logMAR values allowed meaningful comparisons between Screening, DOT, and Full Refraction.
+
+Step 3: Column by column commentary
+3.1. coding (patient ID)
+•	Raw data: Alphanumeric IDs like NB001, KB002.
+•	Issue: Mixed letters and numbers.
+•	Fix: Split into prefix (letters) and number; Prefix later mapped to region and Number used as patient sequence/order.
+Reason to keep: Provides patient-level traceability and allows regional slicers in the dashboard.
+3.2 gender 
+Raw data: “M”, “F”, blanks.
+Fix: Retained blanks, replace – with blanks and ensured consistent upper case 
+3.3	age & age_categories
+Fix: Created categories: Teenagers (12–19), Young Adults (20–35), Middle-aged Adults (36–59), Older Adults (60+), Undeclared (blank entries)
+Reason to keep: Tells the demographic story in a bar chart (Age distribution).
+3.4	screening_va_ldu_both_logmar (Baseline VA)
+Raw data: Snellen notations with inconsistencies (6/7.5-1, 6/12+1).
+Fix: Applied VA to logMAR conversion formula.
+Reason to keep: This is the baseline measure for unaided vision. Crucial for comparison against DOT and Full Refraction.
+3.5	dot_va_dot_long_both_logmar (DOT Method – Distance)
+Raw data: Same inconsistencies as screening.
+Fix: Standardized via logMAR formula.
+Reason to keep: Represents DOT performance for distance; compared with Full Refraction.
+3.6	dot_va_dot_short_both_logmar (DOT Method – Near)
+Raw data: Contained near VA (sometimes “N6”, “N8”).
+Fix: Converted N-notation to approximate logMAR equivalents.
+Reason to keep: Demonstrates DOT’s ability for near vision correction, complements distance results.
+3.7	fullref_va_lda_both_logmar (Full Refraction – Distance)
+Raw data: Gold standard refraction values.
+Fix: Converted to logMAR.
+Reason to keep: Benchmark for evaluating DOT method.
+3.8	pres_lens_long_re / le & categories (Distance prescriptions)
+Raw data: Values like +2.00, -1.50, Plano, blanks.
+Fix: Categorized into: High / Moderate / Mild Myopia, Emmetropia (0), Hyperopia
+Reason to keep: Tells the story of distance vision problems in the patient population. Displayed as a doughnut chart.
+3.9	pres_lens_short_re / le & categories (Near prescriptions / Adds)
+Raw data: Values like +1.25, +2.00, +3.00.
+Fix: Categorized into: Low Add, Medium Add, High Add
+Reason to keep: Shows near vision problems (presbyopia). Displayed as a separate doughnut chart.
+3.10	 pupillary_distance & categories
+Raw data: 0–4 mm values (too low compared to clinical norms, but consistent within dataset).
+Fix: Categorized as Low / Normal / High.
+Reason to keep: Adds detail on prescription fitting.
+3.11	 rg_test_re_categories / rg_test_le_categories (RG Test)
+Raw data: Mixed responses: “Both”, “Green”, “Red”, “Both – faded”.
+Fix: Standardized into categories: Balanced, Overcorrected (Red bias), Undercorrected (Green bias)
+Reason to keep: Visualized in a stacked bar chart → tells the story of prescription quality, not just outcome.
+3.12	 time_taken columns (dot_time_taken_minutes & fullref_va_time_taken_minutes)
+Raw data: Entries like 1MIN, 3, 3MIN.
+Fix: Removed “MIN” suffix, converted to numeric minutes.
+Reason to keep: KPI cards for efficiency comparison (Avg DOT vs Avg Full Refraction).
+3.13	 Method (from Final Prescription file)
+Raw data: In a separate sheet: “DOT Glasses”, “Full Refraction”, “Preferred”.
+Fix: Merged into dataset via patient coding.
+Standardized to DOT and FULL
+Reason to keep: Used as slicer & category axis in RG Test Results chart → shows balance differences by method.
+
+4. Why These Columns Made It to the Dashboard
+Demographics (Gender, Age, Region) → who are the patients?
+VA logMAR conversions (Screening, DOT, Full Refraction) → how much improvement is possible?
+Prescriptions (Distance & Near categories) → what are the main vision problems?
+RG Test Results → how balanced are the corrections?
+Efficiency (Time taken) → how practical is DOT compared to Full Refraction?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
